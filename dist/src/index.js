@@ -1,0 +1,30 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const database_1 = require("./database");
+const user_1 = __importDefault(require("./routes/user"));
+const authentication_1 = __importDefault(require("./routes/authentication"));
+const groceryItems_1 = __importDefault(require("./routes/groceryItems"));
+const cartItems_1 = __importDefault(require("./routes/cartItems"));
+const authorization_1 = __importDefault(require("./middlewares/authorization"));
+const http_1 = __importDefault(require("http"));
+dotenv_1.default.config();
+const app = (0, express_1.default)();
+const port = process.env.PORT || 3000;
+app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: true }));
+app.use('/authenticate', authentication_1.default);
+app.use('/user', authorization_1.default.authorize, user_1.default);
+app.use('/groceryItems', authorization_1.default.authorize, groceryItems_1.default);
+app.use('/cartItems', authorization_1.default.authorize, cartItems_1.default);
+(0, database_1.testDbConnection)();
+const server = new http_1.default.Server(app);
+server.listen(port, () => {
+    console.log(`[server]: Server is running at http://localhost:${port}`);
+    console.log(`[server]: Press CTRL + C to stop server`);
+});
+exports.default = server;
